@@ -1,7 +1,13 @@
 == Description
+  This project is an attempt at making the installation of the oracle libraries for ruby easier.
 
 == Prerequisites 
   ruby
+  rake
 
 == Usage
+  $ cd ruby_oracle_libs/osx
+  $ rake ruby_oracle_libs:install 
+  
+  Note: Use the appropriate directory for your OS.
 

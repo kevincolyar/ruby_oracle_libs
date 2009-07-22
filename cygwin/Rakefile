@@ -1,7 +1,7 @@
 namespace :ruby_oracle_libs do
 
   desc "Install all third party cygwin libraries"
-  task :cygwin => ['cygwin:oci8']
+  task :install => ['cygwin:oci8']
 
   namespace :cygwin do 
 

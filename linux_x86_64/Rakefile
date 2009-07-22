@@ -1,7 +1,7 @@
 namespace :ruby_oracle_libs do
 
   desc "Install all third party linux_x64 libraries"
-  task :linux_x86_64 => ['linux_x86_64:oci8']
+  task :install => ['linux_x86_64:oci8']
 
   namespace :linux_x86_64 do 
 

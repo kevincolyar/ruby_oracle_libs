@@ -1,6 +1,6 @@
 namespace :ruby_oracle_libs do
   desc "Install all third party osx libraries"
-  task :osx => ['osx:oci8']
+  task :install => ['osx:oci8']
 
   namespace :osx do 
     desc "Install ruby-oci8"
