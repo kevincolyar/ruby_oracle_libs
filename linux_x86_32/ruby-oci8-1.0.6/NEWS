@@ -1,0 +1,407 @@
+1.0.6:
+
+* fix a problem when compiling for Oracle 8.0.
+  (reported by Axel Reinhold as a ruby-oci8 2.0 issue)
+
+* [dbi] fix to pass a newly added sanity check in dbi 0.4.1.
+  (reported by Dirk Herzhauser as a ruby-oci8 2.0 issue)
+
+* [dbi] fix dbh#columns for Oracle 8.1 or lower.
+  The data dictionary all_constraints doesn't have index_name
+  column on Oracle 8i. Rewrite DBI::DBD::OCI8::Database#columns
+  by using all_cons_columns.
+  (backport from ruby-oci8 trunk)
+
+1.0.5:
+
+No changes except who try to install on Mac OS X ppc.
+
+- fix big/little endian checking problem on Mac OS X ppc.
+  (contributed by unknown. See: Bug ID 24284 on rubyforge.)
+
+1.0.4:
+
+1. [dbi] support ruby-dbi 0.4
+   (Thanks to James Cao and Peter Zingg.)
+
+   Ruby-dbi 0.4 is supported by DBD::OCI8 after 6 months from the
+   release of 0.4.
+
+   If you are using ruby-dbi 0.1.1, you need to copy dbd/OCI8.rb
+   to DBD/OCI8/OCI8.rb. The file itself works fine with ruby-dbi
+   0.1.1, but the dbi cannot find the file by default.
+
+2. Rowid column data are fetched as a String by default.
+
+3. The return type of OCI8::Cursor#rowid is changed from OCIRowid
+   to String.
+
+   Note: It needs one network roundtrip to convert OCIRowid to
+   String on server side when using Oracle 8.x client.
+   On Oracle 9.0 or upper it is converted in the client side.
+
+4. An exception is raised if a connection is used in a process which is
+   different with a process to establish the connection.
+
+   If you encounter an exception "The connection cannot be reused in the
+   forked process," see the following link.
+
+     http://groups.google.com/group/phusion-passenger/browse_thread/thread/b00d4770bc1d00b8
+
+5. fix for 11.1.0.7.0 instant rpm package.
+   (reported by Luis Parravicini.)
+
+   The directory tree is a bit different with that of 11.1.0.6.0
+   or earlier.
+
+6. suppress compilation warnings.
+   (contributed by Daniel Berger)
+
+1.0.3:
+
+1. add workaround code for a losing character problem when reading CLOB.
+   (reported by Efren Yevale and Thomas Witt and fixed with Thomas Witt's help.)
+
+   The problem is happened at the following condition.
+
+   (a) Oracle client version is 10.2.0.4 or 11.1.0.6.
+       It doesn't happend when using 10.2.0.3 client or lower.
+       It doesn't depend on Oracle server version.
+
+   (b) The character set is a variable-length one.
+       e.g. AL32UTF8
+
+2. fix a problem when reading BLOB/CLOB over 1GB.
+   (reported by Jonathan Hadders.)
+
+3. [rails] fix a problem that OraNumber#to_json returns "{}" when using Rails.
+   (reported by Alex Moore)
+
+   Rails add to_json method. But it doesn't know what OraNumber is.
+   OraNumber#to_json is added for Rails.
+
+4. [dbi] fix a problem when using Oracle 8i and ruby-dbi.
+   (reported by Glauco Magnelli.)
+
+1.0.2:
+
+1. add a gemspec file.
+   (Thanks to Jesse Hu)
+
+   To make a pure ruby gems package:
+     gem build ruby-oci8.gemspec
+
+   To make a binary gems package:
+     gem build ruby-oci8.gemspec -- current
+
+
+2. [BUG FIX] fix a segv bug in gc mark.
+   (Thanks to authorNari)
+
+1.0.1:
+
+1. [SPEC CHANGE] OCI8#exec and OCI8::Cursor#exec's return value is changed
+   for statement except select, insert, update and delete statement.
+
+   It had been true. But now it is the number of rows processed for all
+   non-select statements.
+
+   For example:
+
+     # 1.0.0 or before
+     conn = OCI8.new('user/pass')
+     conn.exec('rename FOO_TABLE to BAR_TABLE') # => true
+
+     # 1.0.1
+     conn = OCI8.new('user/pass')
+     conn.exec('rename FOO_TABLE to BAR_TABLE') # => 0
+
+2. fix a bug that OraDate.new made a core dump on x86_64 linux.
+  (reported by Alun Eyre)
+
+3. fix OCI8#non_blocking = false problem.
+  Once the connection became non-bocking mode, it could
+  not be reset to blocking mode. Now it can be reset.
+  (reported by Cagdas Gerede)
+
+4. support cursors in a result set.
+   (contributed by Randy Gordon)
+
+   For example:
+      conn = OCI8.new('ruby/oci8')
+      sql = 'SELECT CURSOR(SELECT * FROM foo where foo.c1 = bar.c1 ) FROM bar'
+      conn.exec(sql) do |row|
+        cursor_in_result_set = row[0]
+        cursor_in_result_set.fetch do |row|
+          puts row.join(',')
+        end
+      end
+
+5. fix oraconf.rb for official x86_64 linux rpms.
+   (contributed by Pat)
+
+1.0.0:
+
+1. fix a BUG when binding a Bignum. This bug was added in
+   ruby-oci8 1.0.0-rc2. (reported by Daniel Berger)
+
+2. add OCI8#describe_table(table_name), OCI8::Cursor#column_metadata,
+   OCI8::Metadata::Table, OCI8::Metadata::View and OCI8::Metadata::Column.
+
+   table information:
+     con = OCI8.new('username/password')
+     table_info = con.describe_table('table_name') #=> OCI8::Metadata::Table
+     table_info.columns #=> an array of OCI8::Metadata::Column.
+
+   query information:
+     con = OCI8.new('username/password')
+     csr = con.exec('select * from table_name')
+     csr.column_metadata #=> an array of OCI8::Metadata::Column.
+
+5. add OCI8::BindType::BinaryDouble if oci8lib.so is compiled for
+   Oracle 10g client. You can fetch exactly same values in Oracle.
+
+   You could fetch the values in previous version by adding the
+   following line.
+
+     OCI8::BindType::Mapping[101] = OCI8::BindType::Float
+     (This is default in ruby-oci8 1.0.0-rc2.)
+
+   But a fetched value may not be exactly same with the value in
+   Oracle. That's because OCI8::BindType::Float's network
+   representation is Oracle NUMBER data type. A BINARY_DOUBLE
+   value in Oracle become NUMBER on the network and is converted
+   to Float on the client side. It makes a bit difference by
+   round-off error.
+
+   In addition, Oracle NUMBER doesn't have NaN, +Infinity and -Infinity.
+   You cannot fetch the values by older versions.
+
+   Note: When you bind a Float value, it is bound by
+   OCI8::BindType::Float by default. You have two ways to bind
+   it by OCI8::BindType::BinaryDouble.
+
+   a. bind explicitly.
+
+      con = OCI8.new('ruby/oci8')
+      csr = con.parse('insert into table_name values (:1)')
+      csr.bind_param(1, 10.5, OCI8::SQLT_IBDOUBLE)
+      csr.exec
+
+   b. change the default behaviour if and only if you are sure that
+      the Oracle client version and Oracle server version are both
+      10g or upper.
+
+      # use OCI8::BindType::BinaryDouble for ruby's Float values.
+      OCI8::BindType::Mapping[Float] = OCI8::BindType::BinaryDouble
+      con = OCI8.new('ruby/oci8')
+      csr = con.exec('insert into table_name values (:1)', 10.5)
+
+4. OCI8::Cursor#fetch_hash accepts a block as a iterator.
+
+5. [dbi] support external OS authentication.
+   (contributed by Dan Fitch)
+
+     dbh = DBI.connect('dbi:OCI8', nil, nil)
+
+6. [dbi] add DatabaseHandle#columns and improve StatementHandle#column_info
+   (suggested by Venkat Pa)
+
+7. [bug] fix a problem when binding ''(empty string) via dbi.
+
+1.0.0-rc3:
+
+1. support external OS authentication.
+   (suggested by Dan Fitch)
+
+      conn = OCI8.new('/')
+   or
+      conn = OCI8.new(nil, nil)
+
+2. incompatible change on connect string.
+
+   You need to pass only one argument to OCI8.new to parse the
+   first argument as a SQL*Plus-like connect string.
+
+   For example, OCI8.new('scott/tiger', nil) was parsed as the
+   username is 'scott' and the password is 'tiger' in 1.0.0-rc2.
+   But from now on, it is treated as the username is 'scott/tiger'
+   and the password is nil because it has two arguments. You need
+   to use OCI8.new('scott/tiger') instead.
+
+3. fix NCLOB support on Oracle 9i.
+   (reported by Matthew Noble)
+
+   1.0.0-rc2's NCLOB support worked on Oracle 10g only.
+
+4. fix a problem to compile with a third-party x86_64 rpm package.
+   (contributed by Jeff Abbott)
+
+   The x86_64 source rpm packages are found on the following URLs.
+     http://freshrpms.net/docs/oracle/
+     http://remi.collet.free.fr/index.php?2007/01/22/279-oracle-instant-client-10203-on-x86_64
+
+5. '--with-instant-client' option become obsolete and is ignored.
+
+   Use LD_LIBRARY_PATH(Linux), PATH(Windows), etc. to indicate
+   the instant client's location.
+
+6. fix some other minor problems.
+
+1.0.0-rc2:
+
+1. support SQL*Plus-like connect strings.
+   (contributed by Oracle Corporation)
+
+     require 'oci8'
+     conn = OCI8.new('username/password@tns_name')
+     # instead of OCI8.new('username', 'password', 'tns_name')
+
+2. Add a rpm spec file.
+   (contributed by Brian Candler)
+
+     rpmbuild -tb ruby-oci8-x.y.z.tar.gz
+
+     /usr/src/redhat/RPMS/i386/ruby-oci8-x.y.z-1.i386.rpm
+
+3. support BINARY_FLOAT and BINADY_DOUBLE columns.
+   (This problem is reported by Duncan McCaffery.)
+
+4. support NCLOB columns.
+   (This problem is reported by Dmitry Zadvornykh.)
+
+     cursor = conn.exec('select nclob_column from nclob_table')
+     cursor.fetch # => [ instance of OCI8::NCLOB ]
+
+5. add new CLOB/NCLOB/BLOB insert method.
+   (This is available on Oracle 8.1.5 or later.)
+
+     cursor = conn.parse("INSERT INTO clob_table VALUES (:1)")
+     cursor.bind_param(1, OCI8::CLOB.new(conn, lob_data))
+     cursor.exec
+
+     cursor = conn.parse("INSERT INTO nclob_table VALUES (:1)")
+     cursor.exec(OCI8::NCLOB.new(conn, lob_data))
+
+     conn.exec("INSERT INTO blob_table VALUES (:1)",
+               OCI8::BLOB.new(conn, lob_data))
+
+   This is added to insert CLOB as a SDO_GEOMETRY's parameter
+   to solve a problem reported by Pete Schwamb.
+
+6. add an error location in C code to OCIException's backtrace.
+   This is for debug information.
+
+1.0.0-rc1:
+
+1. support BFILE columns.
+
+2. check whether Full Client or Instant Client by checking load library
+   path on configuration to compile.
+
+3. raise an OCIError with "OCI Library Initialization Error" message if
+   no message can not be retrieved when requiring oci8lib.so.
+
+4. raise "OCI Library Initialization Error" when first connect instead
+   of requiring oci8lib.so. This is a workaround to prevent Rails from
+   being stopped on invalid Oracle environment.
+
+0.1.16:
+
+1. Add LONG and LONG RAW support longer than 65535 bytes.
+
+   Use OCI8#long_read_len and OCI8#long_read_len= to set max long length.
+   The default value is 65535.
+
+2. OraDate and OraNumber can be serialized by Marshal now.
+
+3. OraDate and OraNumber can be serialized by YAML now.
+
+4. Fix bug on OraDate#dup, OraDate#clone, OraNumber#dup and OraNumber#clone.
+   (reported by Daniel Berger.)
+
+   These methods had not duplicated their contents, which caused segmentation
+   fault. Now they duplicate their contents also by adding initialize_copy
+   method.
+
+5. Add a workaround code on cygwin environment variables problem.
+
+   Cygwin manages environment variables by itself. They don't synchroize
+   with Win32's ones. When setting Oracle's environment variables, they
+   are set to cygwin's environment. But Oracle client library read
+   Win32's. Now Oracle-related variables are forcedly set to Win32.
+
+6. Accept all Fixnum values when binding as a Fixnum on 64-bit ruby.
+
+   A Fixnum is a 31-bit integer on 32-bit ruby, 63-bit integer on 64-bit
+   ruby. But it had been bound to 32-bit integer on ruby-oci8. Now it is
+   bound to integer whose bit width is same with ruby.
+
+0.1.15:
+
+1. no new features. :-<
+
+2. suppress memory usage when binding a placeholder which is already bound.
+
+     require 'oci8'
+     conn = OCI8.new('ruby', 'oci8')
+     cursor = conn.parse('select * from foo where key = :key')
+     0.upto(10000) do |key|
+       # bind values had not freed until cursor.close.
+       # Now they are freed when GC is run.
+       cursor.bind_param('key', key)
+       cursor.exec
+       .... fetch ....
+     end
+
+3. fix potentially segmentation fault while exiting process.
+   When exiting process, ruby's objects are GCed with unexpectable
+   order. If an OCIEnv instance was GCed in prior to OCIRowid objects,
+   it caused segmentation fault. 
+
+4. add a workaround code when setting $0.
+   The following code made enviroment variables empty strings on
+   Unix when using ruby 1.8.4, ruby-oci8 0.1.14 and Oracle 10.1.0.
+   (Oracle 10.2.0 and ruby 1.8.2 doesn't have this problem.)
+
+     require 'oci8'
+     ENV['HOME'] # --> valid value
+     $0 = 'foo'
+     ENV['HOME'] # --> ''
+
+5. fix registry search path on compilation.
+   (OracleXE Windows version)
+
+0.1.14:
+
+1. add OCI8#prefetch_rows=.
+    
+   This specifies the number of rows in a single round trip.
+   See: http://www.easysoft.com/products/data_access/odbc_oracle_driver/performance_tuning_guide.html#multiple_rows 
+   In addition, setting zero may become a workaround
+   of some Oracle internal problems.
+   The default value is one.
+
+2. fix bug when binding a Bignum.
+3. (low-level API) add attrSet(OCI_ATTR_DESC_PUBLIC, -1).
+4. (low-level API) add a constant OCI_PTYPE_UNK.
+5. (internal) use OCIEnv.logon when no priviledge login.
+6. (internal) delete code to register malloc/realloc/free callbacks to OCI.
+
+0.1.13:
+
+1. fix a memory leak.
+   (fixed by Nathaniel Talbott.)
+
+   It is recommended to update to 0.1.13 if a program executes many
+   queries. That's bacause 0.1.12 cause 70-byte memory leak per a
+   query.
+
+2. ruby's DateTime support is added.
+   (suggested by Daniel Berger.)
+
+   To fetch Oracle's DATE datatype as ruby's DateTime by default, add
+   the following code to your program.
+
+     OCI8::BindType::Mapping[OCI8::SQLT_DAT] = OCI8::BindType::DateTime
+     OCI8::BindType::Mapping[OCI8::SQLT_TIMESTAMP] = OCI8::BindType::DateTime

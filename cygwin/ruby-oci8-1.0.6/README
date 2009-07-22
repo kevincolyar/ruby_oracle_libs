@@ -1,0 +1,415 @@
+= How to make
+
+== Oracle Full Client (not Oracle Instant Client)
+
+1. check the followings:
+   - ruby and make (or nmake on MSVC) are in the environment variable PATH.
+   - sqlplus runs correctly.
+
+2. check library search path.
+
+   If sqlplus runs correctly, the environments variables are okay in general.
+   But if Oracle is 64-bit and ruby is 32-bit, make sure $ORACLE_HOME/lib32
+   in 32-bit library search path. (LD_LIBRARY_PATH_32 on Solaris, SHLIB_PATH
+   on HP-UX PA-RISC.)
+
+3. make and install
+   gzip -dc ruby-oci8-0.1.xx.tar.gz | tar xvf -
+   cd ruby-oci8-0.1.xx
+   make          # or nmake on MSVC.
+   make install
+
+== Oracle Instant Client
+
+1. donwload "Instant Client Package - Basic" and "Instant Client Package - SDK".
+
+   OTN (Oracle Technology Network):
+     URL:http://otn.oracle.com/
+   Instant Client Donload Page:
+     http://www.oracle.com/technology/software/tech/oci/instantclient/index.html
+
+   note:
+     download 32-bit packages for 32-bit ruby even though your OS is 64-bit.
+
+2. install Oracle Instant Client Packages.
+
+   zip packages:
+
+     mkdir /opt
+     mkdir /opt/oracle
+     cd /opt/oracle
+     unzip path/to/instantclient-basic-XXXX-10.1.0.X.zip
+     unzip path/to/instantclient-sdk-XXXX-10.1.0.X.zip
+
+   rpm packages:
+
+     rpm -i path/to/oracle-instantclient-basic-10.1.0.X-X.XXX.rpm
+     rpm -i path/to/oracle-instantclient-devel-10.1.0.X-X.XXX.rpm
+
+     note for Debian user:
+       convert rpm packages to deb packages by alien.
+         alien path/to/oracle-instantclient-basic-10.1.0.X-X.XXX.rpm
+         alien path/to/oracle-instantclient-devel-10.1.0.X-X.XXX.rpm
+         dpkg -i oracle-instantclient-basic_10.1.0.X-X_XXX.deb
+         dpkg -i oracle-instantclient-devel_10.1.0.X-X_XXX.deb
+
+3. check installed libraries. (UNIX zip packages only)
+
+   If /opt/oracle/instantclient10_1/libclntsh.so not found,
+   make a symbolic link.
+
+     cd /opt/oracle/instantclient10_1
+     ln -s libclntsh.so.10.1 libclntsh.so
+
+   note:
+     libclntsh.sl for HP-UX PA-RISC
+     libclntsh.dylib for Mac OS X
+
+4. set library search path.
+
+   Windows:
+     add c:\oracle\instantclient10_1 to PATH.
+
+   AIX:
+     add /opt/oracle/instantclient10_1 to LIBPATH.
+
+   HP-UX PA-RISC 32-bit ruby:
+     add /opt/oracle/instantclient10_1 to SHLIB_PATH.
+
+   SPARC/Solaris 32-bit ruby:
+     add /opt/oracle/instantclient10_1 to LD_LIBRARY_PATH_32.
+
+   SPARC/Solaris 64-bit ruby:
+     add /opt/oracle/instantclient10_1 to LD_LIBRARY_PATH_64.
+
+   Mac OS X:
+     add /opt/oracle/instantclient10_1 to DYLD_LIBRARY_PATH.
+
+   Others:
+     add /opt/oracle/instantclient10_1 to LD_LIBRARY_PATH.
+
+5. make and install.
+
+   zip packages:
+     gzip -dc ruby-oci8-0.1.xx.tar.gz | tar xvf -
+     cd ruby-oci8-0.1.xx
+     ruby setup.rb config -- --with-instant-client=/opt/oracle/instantclient10_1
+     make
+     make install
+
+   rpm packages:
+     gzip -dc ruby-oci8-0.1.xx.tar.gz | tar xvf -
+     cd ruby-oci8-0.1.xx
+     ruby setup.rb config -- --with-instant-client
+     make
+     make install
+
+== On compilation failure
+
+  Please report the following information to kubo@jiubao.org.
+
+  * last 100 lines of 'ext/oci8/mkmf.log'.
+  * the results of the following commands:
+      ruby --version
+      ruby -r rbconfig -e "p Config::CONFIG['host']"
+      ruby -r rbconfig -e "p Config::CONFIG['CC']"
+      ruby -r rbconfig -e "p Config::CONFIG['CFLAGS']"
+      ruby -r rbconfig -e "p Config::CONFIG['LDSHARED']"
+      ruby -r rbconfig -e "p Config::CONFIG['LDFLAGS']"
+      ruby -r rbconfig -e "p Config::CONFIG['DLDLAGS']"
+      ruby -r rbconfig -e "p Config::CONFIG['LIBS']"
+      ruby -r rbconfig -e "p Config::CONFIG['GNU_LD']"
+  * if you use gcc:
+      gcc --print-prog-name=ld
+      gcc --print-prog-name=as
+  * on platforms which can use both 32bit/64bit binaries:
+      file $ORACLE_HOME/bin/oracle  # Full Client only
+      file `which ruby`
+      echo $LD_LIBRARY_PATH
+      echo $LIBPATH              # AIX
+      echo $SHLIB_PATH           # HP-UX PA-RISC
+      echo $DYLD_LIBRARY_PATH    # Mac OS X
+      echo $LD_LIBRARY_PATH_32   # Solaris
+
+= How to run
+
+== Oracle Full Client (not Oracle Instant Client)
+
+1. set environmet variables.
+
+   The follwing environmet variables are required:
+
+     * ORACLE_HOME
+       UNIX only. This variable is set on registry on Windows.
+
+     * NLS_LANG
+       UNIX only. This variable is set on registry on Windows.
+
+     * library serach path
+
+       Windows:
+         add %ORACLE_HOME%\bin to PATH.
+
+       AIX:
+         add $ORACLE_HOME/lib to LIBPATH.
+
+       HP-UX PA-RISC 32-bit ruby:
+         add $ORACLE_HOME/lib32 to SHLIB_PATH.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       SPARC/Solaris 32-bit ruby:
+         add $ORACLE_HOME/lib32 to LD_LIBRARY_PATH_32.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       SPARC/Solaris 64-bit ruby:
+         add $ORACLE_HOME/lib to LD_LIBRARY_PATH_64.
+
+       Mac OS X:
+         add $ORACLE_HOME/lib to DYLD_LIBRARY_PATH.
+
+       Other 32-bit ruby:
+         add $ORACLE_HOME/lib32 to LD_LIBRARY_PATH.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       Other 64-bit ruby:
+         add $ORACLE_HOME/lib to LD_LIBRARY_PATH.
+
+   To connect the local database:
+
+     * ORACLE_SID
+
+2. enjoy.
+
+   sample one-liner:
+     ruby -r oci8 -e 'OCI8.new("scott", "tiger", nil).exec("select * from emp") do |r| puts r.join(","); end'
+
+== Oracle Instant Client
+
+1. set environmet variables.
+
+   The follwing environmet variables are required:
+
+     * NLS_LANG
+
+     * library serach path
+
+       Windows:
+         add %ORACLE_HOME%\bin to PATH.
+
+       AIX:
+         add $ORACLE_HOME/lib to LIBPATH.
+
+       HP-UX PA-RISC 32-bit ruby:
+         add $ORACLE_HOME/lib32 to SHLIB_PATH.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       SPARC/Solaris 32-bit ruby:
+         add $ORACLE_HOME/lib32 to LD_LIBRARY_PATH_32.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       SPARC/Solaris 64-bit ruby:
+         add $ORACLE_HOME/lib to LD_LIBRARY_PATH_64.
+
+       Mac OS X:
+         add $ORACLE_HOME/lib to DYLD_LIBRARY_PATH.
+
+       Other 32-bit ruby:
+         add $ORACLE_HOME/lib32 to LD_LIBRARY_PATH.
+         If $ORACLE_HOME/lib32 doesn't exist, add $ORACLE_HOME/lib instead.
+
+       Other 64-bit ruby:
+         add $ORACLE_HOME/lib to LD_LIBRARY_PATH.
+
+   ORACLE_HOME and TNS_ADMIN are optional:
+     see: http://www.oracle.com/technology/tech/oci/instantclient/ic-faq.html#A4428
+
+2. enjoy.
+
+   sample one-liner:
+     ruby -r oci8 -e 'OCI8.new("scott", "tiger", "//HOSTNAME_OR_IP/SID").exec("select * from emp") do |r| puts r.join(","); end'
+
+== Platform specific topics
+
+=== HP-UX
+
+1. I was reported that it doesn't work with 64-bit ruby. :-<
+
+2. link the libraries which contain thread local storages to ruby itself.
+
+   ruby 1.8.1 or later:
+     gzip -dc ruby-1.8.2.tar.gz | tar xvf -
+     cd ruby-1.8.2
+     ./configure --enable-pthread
+     vi Makefile     # add "-lcl" to LIBS manually.
+     make
+     make install
+
+   ruby 1.8.0 or 1.6.x:
+     gzip -dc ruby-1.x.x.tar.gz | tar xvf -
+     cd ruby-1.x.x
+     ./configure
+     vi Makefile     # add "-lpthread -lcl" to LIBS manually.
+     make
+     make install
+
+   If you can't recompile ruby, LD_PRELOAD may solve the problem.
+
+     LD_PRELOAD=/usr/lib/libpthread.1:/usr/lib/libcl.2
+     export LD_PRELOAD
+
+=== Intel Mac
+
+Oracle intant client is still, when I write this, pcc.
+
+1. check whether the ruby is ppc bianry.
+
+     file `which ruby`
+
+   If it is universal bianry, use ditto to extract ppc binary.
+
+      http://blog.sven-tissot.de/daylist_html?year=2006&month=4&day=12
+
+   If it is i386 binary, compie it as ppc.
+
+2. fix compilation flags.
+
+      ruby -r rbconfig -e "p Config::CONFIG['CFLAGS']"
+      ruby -r rbconfig -e "p Config::CONFIG['DLDLAGS']"
+
+   If they have '-arch i386', delete it from:
+      /usr/lib/ruby/1.8/powerpc-darwin8.0/rbconfig.rb
+   or
+      /usr/lib/ruby/1.8/universal-darwin8.0/rbconfig.rb
+
+   If haven't '-arch ppc', add it.
+
+3. config, make and install
+
+     ruby setup.rb config -- --with-instant-client=/opt/oracle/instantclient10_1
+     make
+     make install
+
+4. rollback the changes in 2.
+
+***************************
+in progress.
+
+
+= How to run unit tests
+
+1. see "How to run"
+
+2. create user and tables on Oracle.
+
+   - connect to Oracle as system:
+
+      $ sqlplus system/<password_of_system>
+
+   - create user ruby:
+
+      SQL> CREATE USER ruby IDENTIFIED BY oci8;
+    or
+      SQL> CREATE USER ruby IDENTIFIED BY oci8
+         2 DEFAULT TABLESPACE users TEMPORARY TABLESPACE temp;
+
+   - grant the privilege to connect and execute.
+
+      SQL> GRANT connect, resource, create synonym TO ruby;
+
+   - If the Oracle version is 8i or later:
+
+      SQL> CREATE TABLE ruby.test_clob (filename VARCHAR2(40), content CLOB);
+
+   - connect to Oracle as sys
+
+      $ sqlplus 'sys/<password_of_sys> as sysdba'
+
+   - grant the privilege for the unittest of blocking-mode.
+
+      SQL> GRANT EXECUTE ON dbms_lock TO ruby;
+
+3. set $dbname in test/config.rb.
+
+   for instant client, or full client which connect the remote server.
+
+4. run.
+
+     $ make check
+   or
+     $ nmake check   (If your compiler is MS Visual C++.)
+
+
+= How to customize fetched datatypes.
+
+== OCI8::BindType::Mapping
+
+OCI8::BindType::Mapping is available to change the mapping of Oracle
+datatypes and ruby datatypes.
+
+Examples:
+  fetch a Timestamp value as a OraDate:
+    OCI8::BindType::Mapping[OCI8::SQLT_TIMESTAMP] = OCI8::BindType::OraDate
+  fetch a Timestamp value as a String:
+    OCI8::BindType::Mapping[OCI8::SQLT_TIMESTAMP] = OCI8::BindType::String
+
+Bind-types are:
+  OCI8::BindType::String
+  OCI8::BindType::RAW
+  OCI8::BindType::OraDate
+  OCI8::BindType::Time
+  OCI8::BindType::Date
+  OCI8::BindType::DateTime (ruby 1.8.0 or upper)
+  OCI8::BindType::Float
+  OCI8::BindType::Fixnum
+  OCI8::BindType::Integer
+  OCI8::BindType::OraNumber
+  OCI8::BindType::Number
+  OCI8::BindType::OCIRowid
+  OCI8::BindType::BLOB
+  OCI8::BindType::CLOB
+  OCI8::BindType::Cursor
+
+== Number datatype.
+
+OCI8::BindType::Number is a special bindtype. The actual bindtype
+depends on the precision and scale.
+  Fixnum or Integer for NUMBER(p, 0). (prec is positive).
+  Float for NUMBER(prec, scale). (prec is less then 15).
+  OraNumber for NUMBER(prec, scale). (prec equals or is greater then 15).
+
+If fetched value is defiend as NUMBER or calculated value, it is
+fetched as a Float by default. To customize this behavior, you can
+use OCI8::BindType::Mapping[:number_unknown_prec] and
+OCI8::BindType::Mapping[:number_no_prec_setting].
+
+Oracle 9.2.0.2 or earlier:
+  OCI8::BindType::Mapping[:number_unknown_prec] changes both behaviors.
+
+Oracle 9.2.0.3 or later:
+  OCI8::BindType::Mapping[:number_no_prec_setting] changes the former.
+  OCI8::BindType::Mapping[:number_unknown_prec] changes the latter.
+
+Examples:
+
+  CREATE TABLE tab1 (col1 NUMBER, col2 NUMBER(10));
+  SELECT col1 AS col FROM tab1:
+  SELECT col2 * 1.0 AS cal2 FROM tab1;
+  # col : NUMBER whose precision and scale are not defined explicitly.
+  # cal : calculated NUMBER value.
+
+  Oracle 9.2.0.2 or earlier:
+    OCI8::BindType::Mapping[:number_unknown_prec] = OCI8::BindType::Integer
+      ==> col is fetched as an Integer.
+          cal is fetched as an Integer.
+    :number_unknown_prec changes the both behaviors.
+
+  Oracle 9.2.0.3 or later:
+    OCI8::BindType::Mapping[:number_unknown_prec] = OCI8::BindType::Integer
+      ==> col is fetched as a Float.
+          cal is fetched as an Integer.
+    :number_unknown_prec changes the latter only.
+
+    OCI8::BindType::Mapping[:number_no_prec_setting] = OCI8::BindType::Integer
+      ==> col is fetched as an Integer.
+          cal is fetched as a Float.
+    :number_no_prec_setting changes the former only.
