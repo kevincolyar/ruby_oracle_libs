@@ -1,0 +1,26 @@
+
+#! /bin/sh
+#
+# ott - shell for invoking the Object Type Translator
+# Usage:  ott <option>=<option_value> ...
+#
+# Note: The options are automatically prefixed with two other options
+#       that specify a couple of environment variables:
+#       nlslang passes in $NLS_LANG and orahome passes in $ORACLE_HOME.
+#
+# %W% %E%
+#
+
+#set -x 
+
+unset JAVA_HOME
+JAVA_HOME=$ORACLE_HOME/jdk
+export JAVA_HOME
+
+JRECLASSPATH=:$ORACLE_HOME/jdbc/lib/ojdbc14.jar:$ORACLE_HOME/jlib/orai18n.jar:$ORACLE_HOME/precomp/lib/ottclasses.zip
+export JRECLASSPATH
+
+DYLD_LIBRARY_PATH=$ORACLE_HOME/lib32:$JAVA_HOME/lib:$DYLD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH
+
+exec $JAVA_HOME/bin/java -classpath $JRECLASSPATH oracle.ott.c.CMain nlslang=${NLS_LANG} orahome=${ORACLE_HOME} "$@"

@@ -1,0 +1,49 @@
+namespace :ruby_oracle_libs do
+  desc "Install all third party osx libraries"
+  task :install => ['osx:oci8']
+
+  namespace :osx do 
+    desc "Install ruby-oci8"
+    task :oci8 => [:oracle_libs] do
+      puts "Installing ruby-oci8-1.0.6"
+      cmd = "
+          cd ruby-oci8-1.0.6;
+          export SQLPATH=/Library/Oracle/instantclient/10.2.0.4;
+          export RC_ARCHS=x86_64;
+          ruby setup.rb config;
+          make;
+          sudo make install;
+       "
+       system(cmd) 
+
+    end
+
+    desc "Install Oracle Libraries"
+    task :oracle_libs do
+      puts "Installing Oracle libs"
+      oracle_version = "10.2.0.4"
+      oracle_home = "/Library/Oracle/instantclient/#{oracle_version}"
+
+      cmd = "
+        sudo mkdir -p #{oracle_home}  ;
+        sudo cp -r instantclient_10_2/* #{oracle_home};
+        sudo ln -s #{oracle_home}/libclntsh.dylib.10.1 #{oracle_home}/libclntsh.dylib
+      "
+      system(cmd) 
+
+      puts "!!! - Don't forget to put the following in your ~/.bash_profile. - !!!"
+      puts "
+            export ORACLE_HOME=#{oracle_home}
+            export TNS_ADMIN=$ORACLE_HOME
+            export LD_LIBRARY_PATH=$ORACLE_HOME
+            export DYLD_LIBRARY_PATH=$ORACLE_HOME
+            export PATH=$PATH:$ORACLE_HOME
+          "
+      puts "Then run "
+      puts "$ source ~/.bash_profile" 
+      puts "to apply the settings."
+
+    end
+  end
+
+end
