@@ -9,6 +9,7 @@ namespace :ruby_oracle_libs do
       cmd = "
           cd ruby-oci8-1.0.6;
           export SQLPATH=/Library/Oracle/instantclient/10.2.0.4;
+          export DYLD_LIBRARY_PATH=/Library/Oracle/instantclient/10.2.0.4;
           export RC_ARCHS=x86_64;
           ruby setup.rb config;
           make;
