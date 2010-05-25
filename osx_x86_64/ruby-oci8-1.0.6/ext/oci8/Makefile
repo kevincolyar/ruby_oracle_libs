@@ -3,7 +3,7 @@ SHELL = /bin/sh
 
 #### Start of system configuration section. ####
 
-srcdir = /Users/kevincolyar/development/github/ruby_oracle_libs/osx_64/ruby-oci8-1.0.6/ext/oci8
+srcdir = /Users/kevinb/dcpud/dms/lib/third_party/osx_x86_64/ruby-oci8-1.0.6/ext/oci8
 topdir = /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/1.8/universal-darwin10.0
 hdrdir = $(topdir)
 VPATH = $(srcdir):$(topdir):$(hdrdir)
@@ -45,7 +45,7 @@ LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)
 
 RUBY_EXTCONF_H = extconf.h
 CFLAGS   =  -fno-common -arch x86_64 -g -Os -pipe -fno-common -DENABLE_DTRACE  -fno-common  -pipe -fno-common $(cflags) -I/Library/Oracle/instantclient/10.2.0.4/sdk/include -Wall 
-INCFLAGS = -I. -I. -I/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/1.8/universal-darwin10.0 -I/Users/kevincolyar/development/github/ruby_oracle_libs/osx_64/ruby-oci8-1.0.6/ext/oci8
+INCFLAGS = -I. -I. -I/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/1.8/universal-darwin10.0 -I/Users/kevinb/dcpud/dms/lib/third_party/osx_x86_64/ruby-oci8-1.0.6/ext/oci8
 DEFS     = 
 CPPFLAGS = -DRUBY_EXTCONF_H=\"$(RUBY_EXTCONF_H)\"  -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE  
 CXXFLAGS = $(CFLAGS) 

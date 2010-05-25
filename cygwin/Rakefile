@@ -1,35 +1,32 @@
-namespace :ruby_oracle_libs do
+desc "Install all third party cygwin libraries"
+  task :default => ['cygwin:oci8']
 
-  desc "Install all third party cygwin libraries"
-  task :install => ['cygwin:oci8']
+namespace :cygwin do 
 
-  namespace :cygwin do 
-
-    desc "Install cygwin ruby-oci8"
-    task :oci8 => [:oracle_libs] do 
-      puts "Installing ruby-oci8-1.0.6"
-      cmd = "
+  desc "Install cygwin ruby-oci8"
+  task :oci8 => [:oracle_libs] do 
+    puts "Installing ruby-oci8-1.0.6"
+    cmd = "
          export PATH=/cygdrive/c/oracle/instantclient_11_1:$PATH;
-         cp -r ruby-oci8-1.0.6 /tmp/;
+         cp -r lib/third_party/cygwin/ruby-oci8-1.0.6 /tmp/;
          cd /tmp/ruby-oci8-1.0.6;
          make && make install;
        "
-       system(cmd) 
-    end
+    system(cmd) 
+  end
 
-    desc "Install Oracle Libraries"
-    task :oracle_libs do
-      puts "Installing Oracle libs"
-      cmd = "
+  desc "Install Oracle Libraries"
+  task :oracle_libs do
+    puts "Installing Oracle libs"
+    cmd = "
         mkdir -p /cygdrive/c/oracle ;
-        cp -r instantclient_11_1 /cygdrive/c/oracle/;
+        cp -r lib/third_party/cygwin/instantclient_11_1 /cygdrive/c/oracle/;
       "
-      system(cmd) 
+    system(cmd) 
 
-      puts "!!! - Don't forget to put /cygdrive/c/oracle/instantclient_11_1 in your path. - !!!"
-      puts "!!! - In your ~/.bash_profile - export PATH=/cygdrive/c/oracle/instantclient_11_1:$PATH - !!!"
-    end
-
+    puts "!!! - Don't forget to put /cygdrive/c/oracle/instantclient_11_1 in your path. - !!!"
+    puts "!!! - In your ~/.bash_profile - export PATH=/cygdrive/c/oracle/instantclient_11_1:$PATH - !!!"
   end
 
 end
+
