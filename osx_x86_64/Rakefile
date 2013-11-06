@@ -22,12 +22,12 @@ namespace :osx_x86_64 do
   task :oracle_libs do
     puts "Installing Oracle libs"
     oracle_version = "10.2.0.4"
-    oracle_home = "/Library/Oracle/instantclient/#{oracle_version}"
+    oracle_home = "~/Library/Oracle/instantclient/#{oracle_version}"
 
     cmd = "
-        sudo mkdir -p #{oracle_home}  ;
-        sudo cp -r lib/third_party/osx_x86_64/instantclient_10_2/* #{oracle_home};
-        sudo ln -s #{oracle_home}/libclntsh.dylib.10.1 #{oracle_home}/libclntsh.dylib
+        mkdir -p #{oracle_home}  ;
+        cp -r instantclient_10_2/* #{oracle_home};
+        ln -s #{oracle_home}/libclntsh.dylib.10.1 #{oracle_home}/libclntsh.dylib
       "
     system(cmd) 
 
