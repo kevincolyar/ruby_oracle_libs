@@ -7,12 +7,17 @@ namespace :linux_x86_32 do
   task :oci8 => [:oracle_libs] do 
     puts "Installing ruby-oci8-1.0.6"
     cmd = "
+         if [ -e $HOME/.rvm/bin/rvmsudo ]; then
+           SUDO=$HOME/.rvm/bin/rvmsudo
+         else
+           SUDO=sudo
+         fi 
          export ORACLE_HOME=/opt/oracle/instantclient_11_1;
          export PATH=$ORACLE_HOME:$PATH;
-         cp -r lib/third_party/linux_x86_32/ruby-oci8-1.0.6 /tmp/;
+         cp -r ruby-oci8-1.0.6 /tmp/;
          cd /tmp/ruby-oci8-1.0.6;
          make; 
-         sudo make install;
+         $SUDO make install;
        "
     system(cmd) 
   end
@@ -21,12 +26,17 @@ namespace :linux_x86_32 do
   task :oracle_libs do
     puts "Installing Oracle libs"
     cmd = "
-        sudo mkdir -p /opt/oracle ;
-        sudo cp -r lib/third_party/linux_x86_32/instantclient_11_1 /opt/oracle/;
+        if [ -e $HOME/.rvm/bin/rvmsudo ]; then
+          SUDO=$HOME/.rvm/bin/rvmsudo
+        else
+          SUDO=sudo
+        fi 
+        $SUDO mkdir -p /opt/oracle ;
+        $SUDO cp -r instantclient_11_1 /opt/oracle/;
         cd /opt/oracle/instantclient_11_1;
-        sudo ln -s libclntsh.so.11.1 libclntsh.so
-        sudo sh -c \"echo /opt/oracle/instantclient_11_1 > /etc/ld.so.conf.d/oracle.conf\"
-        sudo ldconfig
+        $SUDO ln -s libclntsh.so.11.1 libclntsh.so
+        $SUDO sh -c \"echo /opt/oracle/instantclient_11_1 > /etc/ld.so.conf.d/oracle.conf\"
+        $SUDO ldconfig
       "
     system(cmd) 
 
